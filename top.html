@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Page en plein écran avec iframe</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000; /* fond noir */
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* pour éviter les barres de défilement */
+        }
+        #container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Style pour l'iframe si besoin */
+        iframe {
+            /* vous pouvez ajuster la taille ou le style ici */
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Votre iframe -->
+        <iframe id="TextOnTapFrame" src="//text-on-tap.live/captionex.html?e=testevent" style="width:60%; height:140px; border:0;"></iframe>
+    </div>
+
+    <script>
+        // Fonction pour tenter de passer en plein écran
+        function requestFullScreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // Tenter de passer en plein écran après le chargement
+        window.onload = () => {
+            // Note : certains navigateurs nécessitent une interaction utilisateur pour le plein écran
+            requestFullScreen();
+        };
+    </script>
+</body>
+</html>
