@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Iframe déplaçable et redimensionnable</title>
+<script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    height: 100%;
+    overflow: hidden;
+  }
+  #iframe-container {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    width: 60%;
+    height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #my-iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="iframe-container">
+  <iframe id="my-iframe" src="https://text-on-tap.live#e=testevent"></iframe>
+</div>
+
+<script>
+  // Rendre le conteneur déplaçable et redimensionnable
+  interact('#iframe-container')
+    .draggable({
+      inertia: true,
+      modifiers: [
+        interact.modifiers.restrictRect({
+          restriction: 'parent',
+          endOnly: true
+        })
+      ],
+      listeners: {
+        move: dragMoveListener
+      }
+    })
+    .resizable({
+      edges: { left: true, right: true, bottom: true, top: true },
+      inertia: true,
+      modifiers: [
+        interact.modifiers.restrictSize({
+          min: { width: 100, height: 50 },
+          max: { width: 800, height: 600 }
+        })
+      ],
+      listeners: {
+        resize: resizeListener
+      }
+    });
+
+  function dragMoveListener (event) {
+    const target = event.target;
+    // garder la position
+    const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+    const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+    // appliquer la translation
+    target.style.transform = `translate(${x}px, ${y}px)`;
+
+    // sauvegarder la position
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
+  }
+
+  function resizeListener (event) {
+    const target = event.target;
+    const width = event.rect.width;
+    const height = event.rect.height;
+
+    target.style.width = width + 'px';
+    target.style.height = height + 'px';
+  }
+</script>
+
+</body>
+</html>
