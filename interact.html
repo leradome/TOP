@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Test Interact.js</title>
+<!-- Charger la bibliothèque avant de l'utiliser -->
+<script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
+<style>
+  #draggable {
+    width: 150px;
+    height: 150px;
+    background-color: #4CAF50;
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+  }
+</style>
+</head>
+<body>
+
+<div id="draggable">Déplace-moi</div>
+
+<script>
+  interact('#draggable')
+    .draggable({
+      inertia: true,
+      modifiers: [
+        interact.modifiers.restrictRect({
+          restriction: 'parent',
+          endOnly: true
+        })
+      ],
+      listeners: {
+        move: function (event) {
+          const target = event.target;
+          const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+          const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+          target.style.transform = `translate(${x}px, ${y}px)`;
+          target.setAttribute('data-x', x);
+          target.setAttribute('data-y', y);
+        }
+      }
+    });
+</script>
+
+</body>
+</html>
