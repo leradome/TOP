@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8" />
 <title>Test Interact.js</title>
-<!-- Charger la bibliothèque avant de l'utiliser -->
 <script src="https://cdn.jsdelivr.net/npm/@interactjs/interactjs/dist/interact.min.js"></script>
 <style>
   #draggable {
@@ -25,27 +24,35 @@
 <div id="draggable">Déplace-moi</div>
 
 <script>
-  interact('#draggable')
-    .draggable({
-      inertia: true,
-      modifiers: [
-        interact.modifiers.restrictRect({
-          restriction: 'parent',
-          endOnly: true
-        })
-      ],
-      listeners: {
-        move: function (event) {
-          const target = event.target;
-          const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-          const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+  // Vérifiez si interact est défini
+  console.log('interact:', typeof interact);
 
-          target.style.transform = `translate(${x}px, ${y}px)`;
-          target.setAttribute('data-x', x);
-          target.setAttribute('data-y', y);
+  // Si c'est "undefined", la bibliothèque n'est pas chargée
+  if (typeof interact !== 'undefined') {
+    interact('#draggable')
+      .draggable({
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: 'parent',
+            endOnly: true
+          })
+        ],
+        listeners: {
+          move: function (event) {
+            const target = event.target;
+            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+          }
         }
-      }
-    });
+      });
+  } else {
+    alert('La bibliothèque interact.js n\'a pas été chargée correctement.');
+  }
 </script>
 
 </body>
