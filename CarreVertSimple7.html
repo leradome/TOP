@@ -53,7 +53,7 @@
         z-index: 2;
         width: 22px;
         height: 22px;
-        background: greenyellow;
+        background: purple;
         cursor: nwse-resize;
         touch-action: none;
       }
@@ -221,11 +221,9 @@ document.getElementById("boutonPleinEcran").addEventListener("click", async () =
       if (screen.orientation?.unlock) {
         screen.orientation.unlock();
       }
-
-      ajusterEtCentrer();
-
       await document.exitFullscreen();
     }
+    ajusterEtCentrer();
   } catch (erreur) {
     console.error("Plein écran ou orientation non disponible :", erreur);
   }
