@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Élément déplaçable</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #zone {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #eeeeee;
+      touch-action: none;
+    }
+
+    #draggable {
+      position: absolute;
+      top: 50px;
+      left: 50px;
+      width: 150px;
+      height: 150px;
+      background-color: #4caf50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    #draggable:active {
+      cursor: grabbing;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="zone">
+    <div id="draggable">Déplace-moi</div>
+  </div>
+
+  <script>
+    console.log("Interact.js :", typeof interact);
+
+    if (typeof interact === "undefined") {
+      alert("Interact.js n'a pas été chargé.");
+    } else {
+      interact("#draggable").draggable({
+        inertia: false,
+
+        listeners: {
+          start(event) {
+            const element = event.target;
+
+            // Mémorise la position actuelle au début du déplacement
+            element.dataset.startLeft =
+              parseFloat(getComputedStyle(element).left) || 0;
+
+            element.dataset.startTop =
+              parseFloat(getComputedStyle(element).top) || 0;
+          },
+
+          move(event) {
+            const element = event.target;
+
+            const startLeft = parseFloat(element.dataset.startLeft) || 0;
+            const startTop = parseFloat(element.dataset.startTop) || 0;
+
+            let newLeft = startLeft + event.dx;
+            let newTop = startTop + event.dy;
+
+            const parent = element.parentElement;
+
+            // Limite le déplacement à la zone parente
+            const maxLeft = parent.clientWidth - element.offsetWidth;
+            const maxTop = parent.clientHeight - element.offsetHeight;
+
+            newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+            newTop = Math.max(0, Math.min(newTop, maxTop));
+
+            element.style.left = `${newLeft}px`;
+            element.style.top = `${newTop}px`;
+          }
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
