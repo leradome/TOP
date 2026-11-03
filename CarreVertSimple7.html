@@ -53,7 +53,7 @@
         z-index: 2;
         width: 22px;
         height: 22px;
-        background: orange;
+        background: orangered;
         cursor: nwse-resize;
         touch-action: none;
       }
@@ -110,9 +110,14 @@
       function ajusterEtCentrer() {
         const largeur = Math.min(panneau.offsetWidth, window.innerWidth);
         const hauteur = Math.min(panneau.offsetHeight, window.innerHeight);
-
+  
+  if (estEnPaysage()) {
         panneau.style.width = `80vw`;
         panneau.style.height = `80vh`;
+  } else {
+        panneau.style.width = `80vw`;
+        panneau.style.height = `30vh`;
+  }
         panneau.style.left = `${(window.innerWidth - largeur) / 2}px`;
         panneau.style.top = `${(window.innerHeight - hauteur) / 2}px`;
       }
@@ -192,6 +197,9 @@
 
       window.addEventListener("load", ajusterEtCentrer);
 
+function estEnPaysage() {
+  return window.innerWidth > window.innerHeight;
+}
 function ajusterSiNecessaire() {
   const largeurMax = window.innerWidth - panneau.offsetLeft;
   const hauteurMax = window.innerHeight - panneau.offsetTop;
