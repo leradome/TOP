@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carré déplaçable</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: white;
+    }
+
+    #carre {
+      position: absolute;
+      left: 50px;
+      top: 50px;
+      width: 50px;
+      height: 50px;
+      background: green;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #carre:active {
+      cursor: grabbing;
+    }
+  </style>
+</head>
+<body>
+  <div id="carre" aria-label="Carré vert déplaçable"></div>
+
+  <script>
+    const carre = document.getElementById("carre");
+    let decalageX = 0;
+    let decalageY = 0;
+
+    carre.addEventListener("pointerdown", (event) => {
+      const rect = carre.getBoundingClientRect();
+      decalageX = event.clientX - rect.left;
+      decalageY = event.clientY - rect.top;
+      carre.setPointerCapture(event.pointerId);
+    });
+
+    carre.addEventListener("pointermove", (event) => {
+      if (!carre.hasPointerCapture(event.pointerId)) return;
+
+      carre.style.left = `${event.clientX - decalageX}px`;
+      carre.style.top = `${event.clientY - decalageY}px`;
+    });
+  </script>
+</body>
+</html>
