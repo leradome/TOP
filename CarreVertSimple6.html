@@ -191,18 +191,34 @@
       });
 
       window.addEventListener("load", ajusterEtCentrer);
-      window.addEventListener("resize", limiterPosition);
+
+function ajusterSiNecessaire() {
+  const largeurMax = window.innerWidth - panneau.offsetLeft;
+  const hauteurMax = window.innerHeight - panneau.offsetTop;
+
+  if (panneau.offsetWidth > largeurMax) {
+    panneau.style.width = `${Math.max(10, largeurMax)}px`;
+  }
+
+  if (panneau.offsetHeight > hauteurMax) {
+    panneau.style.height = `${Math.max(10, hauteurMax)}px`;
+  }
+
+  limiterPosition();
+}
+
+window.addEventListener("resize", ajusterSiNecessaire);
 
       document.getElementById("boutonPleinEcran").addEventListener("click", async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch (erreur) {
+        console.error("Impossible d'activer le plein écran :", erreur);
       }
-    } catch (erreur) {
-      console.error("Impossible d'activer le plein écran :", erreur);
-    }
   });
 
     </script>
