@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Iframe déplaçable et redimensionnable</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -14,22 +19,20 @@
 
     #panneau {
       position: fixed;
-      left: 50px;
-      top: 50px;
-      width: 600px;
-      height: 450px;
-      min-width: 250px;
-      min-height: 180px;
-      box-sizing: border-box;
+      left: 0;
+      top: 0;
+      width: 80vw;
+      height: 20vh;
+      min-width: 10vw;
+      min-height: 10vh;
       border: 1px solid #888;
-      background: darkgray;
+      background: #darkgrayk;
       overflow: hidden;
     }
 
     #barre {
       height: 40px;
       padding: 10px;
-      box-sizing: border-box;
       background: #ddd;
       cursor: grab;
       user-select: none;
@@ -47,24 +50,27 @@
       position: absolute;
       right: 0;
       bottom: 0;
+      z-index: 2;
       width: 22px;
       height: 22px;
       background: #555;
       cursor: nwse-resize;
       touch-action: none;
-      z-index: 2;
     }
   </style>
 </head>
+
 <body>
   <section id="panneau">
     <header id="barre">Faites glisser cette barre pour déplacer</header>
+
     <iframe
       id="iframe"
       src="https://text-on-tap.live/captionex.html?e=testevent"
       title="Contenu intégré">
     </iframe>
-    <div id="poignee" aria-label="Redimensionner"></div>
+
+    <div id="poignee" aria-label="Redimensionner le panneau"></div>
   </section>
 
   <script>
@@ -76,11 +82,20 @@
       const maxX = Math.max(0, window.innerWidth - panneau.offsetWidth);
       const maxY = Math.max(0, window.innerHeight - panneau.offsetHeight);
 
-      const gauche = Math.min(maxX, Math.max(0, panneau.offsetLeft));
-      const haut = Math.min(maxY, Math.max(0, panneau.offsetTop));
+      panneau.style.left =
+        `${Math.min(maxX, Math.max(0, panneau.offsetLeft))}px`;
+      panneau.style.top =
+        `${Math.min(maxY, Math.max(0, panneau.offsetTop))}px`;
+    }
 
-      panneau.style.left = `${gauche}px`;
-      panneau.style.top = `${haut}px`;
+    function ajusterEtCentrer() {
+      const largeur = Math.min(panneau.offsetWidth, window.innerWidth);
+      const hauteur = Math.min(panneau.offsetHeight, window.innerHeight);
+
+      panneau.style.width = `${largeur}px`;
+      panneau.style.height = `${hauteur}px`;
+      panneau.style.left = `${(window.innerWidth - largeur) / 2}px`;
+      panneau.style.top = `${(window.innerHeight - hauteur) / 2}px`;
     }
 
     barre.addEventListener("pointerdown", (event) => {
@@ -94,17 +109,21 @@
         const maxX = Math.max(0, window.innerWidth - panneau.offsetWidth);
         const maxY = Math.max(0, window.innerHeight - panneau.offsetHeight);
 
-        const gauche = Math.min(maxX, Math.max(0, e.clientX - decalageX));
-        const haut = Math.min(maxY, Math.max(0, e.clientY - decalageY));
+        panneau.style.left =
+          `${Math.min(maxX, Math.max(0, e.clientX - decalageX))}px`;
+        panneau.style.top =
+          `${Math.min(maxY, Math.max(0, e.clientY - decalageY))}px`;
+      }
 
-        panneau.style.left = `${gauche}px`;
-        panneau.style.top = `${haut}px`;
+      function terminer() {
+        barre.removeEventListener("pointermove", deplacer);
+        barre.removeEventListener("pointerup", terminer);
+        barre.removeEventListener("pointercancel", terminer);
       }
 
       barre.addEventListener("pointermove", deplacer);
-      barre.addEventListener("pointerup", () => {
-        barre.removeEventListener("pointermove", deplacer);
-      }, { once: true });
+      barre.addEventListener("pointerup", terminer);
+      barre.addEventListener("pointercancel", terminer);
     });
 
     poignee.addEventListener("pointerdown", (event) => {
@@ -115,30 +134,44 @@
       const debutY = event.clientY;
       const largeurInitiale = panneau.offsetWidth;
       const hauteurInitiale = panneau.offsetHeight;
+      const gauche = panneau.offsetLeft;
+      const haut = panneau.offsetTop;
 
       poignee.setPointerCapture(event.pointerId);
 
       function redimensionner(e) {
-        const largeurMax = window.innerWidth - panneau.offsetLeft;
-        const hauteurMax = window.innerHeight - panneau.offsetTop;
+        const largeurMax = Math.max(10, window.innerWidth - gauche);
+        const hauteurMax = Math.max(10, window.innerHeight - haut);
 
-        panneau.style.width = `${Math.max(
-          250,
+        const largeurMin = Math.min(window.innerWidth * 0.1, largeurMax);
+        const hauteurMin = Math.min(window.innerHeight * 0.1, hauteurMax);
+
+        const nouvelleLargeur = Math.max(
+          largeurMin,
           Math.min(largeurMax, largeurInitiale + e.clientX - debutX)
-        )}px`;
+        );
 
-        panneau.style.height = `${Math.max(
-          180,
+        const nouvelleHauteur = Math.max(
+          hauteurMin,
           Math.min(hauteurMax, hauteurInitiale + e.clientY - debutY)
-        )}px`;
+        );
+
+        panneau.style.width = `${nouvelleLargeur}px`;
+        panneau.style.height = `${nouvelleHauteur}px`;
+      }
+
+      function terminer() {
+        poignee.removeEventListener("pointermove", redimensionner);
+        poignee.removeEventListener("pointerup", terminer);
+        poignee.removeEventListener("pointercancel", terminer);
       }
 
       poignee.addEventListener("pointermove", redimensionner);
-      poignee.addEventListener("pointerup", () => {
-        poignee.removeEventListener("pointermove", redimensionner);
-      }, { once: true });
+      poignee.addEventListener("pointerup", terminer);
+      poignee.addEventListener("pointercancel", terminer);
     });
 
+    window.addEventListener("load", ajusterEtCentrer);
     window.addEventListener("resize", limiterPosition);
   </script>
 </body>
