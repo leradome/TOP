@@ -53,7 +53,7 @@
         z-index: 2;
         width: 22px;
         height: 22px;
-        background: purple;
+        background: greenyellow;
         cursor: nwse-resize;
         touch-action: none;
       }
@@ -111,8 +111,8 @@
         const largeur = Math.min(panneau.offsetWidth, window.innerWidth);
         const hauteur = Math.min(panneau.offsetHeight, window.innerHeight);
 
-        panneau.style.width = `${largeur}px`;
-        panneau.style.height = `${hauteur}px`;
+        panneau.style.width = `80vw`;
+        panneau.style.height = `20vh`;
         panneau.style.left = `${(window.innerWidth - largeur) / 2}px`;
         panneau.style.top = `${(window.innerHeight - hauteur) / 2}px`;
       }
