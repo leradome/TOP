@@ -112,7 +112,7 @@
         const hauteur = Math.min(panneau.offsetHeight, window.innerHeight);
 
         panneau.style.width = `80vw`;
-        panneau.style.height = `20vh`;
+        panneau.style.height = `60vh`;
         panneau.style.left = `${(window.innerWidth - largeur) / 2}px`;
         panneau.style.top = `${(window.innerHeight - hauteur) / 2}px`;
       }
@@ -223,11 +223,11 @@ document.getElementById("boutonPleinEcran").addEventListener("click", async () =
       }
       await document.exitFullscreen();
     }
-    ajusterEtCentrer();
   } catch (erreur) {
     console.error("Plein écran ou orientation non disponible :", erreur);
   }
 });
+screen.orientation?.addEventListener("change", ajusterEtCentrer);
 
 
     </script>
