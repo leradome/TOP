@@ -196,13 +196,13 @@ function ajusterSiNecessaire() {
   const largeurMax = window.innerWidth - panneau.offsetLeft;
   const hauteurMax = window.innerHeight - panneau.offsetTop;
 
-  //if (panneau.offsetWidth > largeurMax) {
+  if (panneau.offsetWidth > largeurMax) {
     panneau.style.width = `${Math.max(10, largeurMax)}px`;
-  //}
+  }
 
-  //if (panneau.offsetHeight > hauteurMax) {
+  if (panneau.offsetHeight > hauteurMax) {
     panneau.style.height = `${Math.max(10, hauteurMax)}px`;
-  //}
+  }
 
   limiterPosition();
 }
@@ -221,6 +221,8 @@ document.getElementById("boutonPleinEcran").addEventListener("click", async () =
       if (screen.orientation?.unlock) {
         screen.orientation.unlock();
       }
+
+      ajusterEtCentrer();
 
       await document.exitFullscreen();
     }
