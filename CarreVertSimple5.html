@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iframe déplaçable et redimensionnable</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: black;
+      font-family: sans-serif;
+    }
+
+    #panneau {
+      position: fixed;
+      left: 50px;
+      top: 50px;
+      width: 600px;
+      height: 450px;
+      min-width: 250px;
+      min-height: 180px;
+      box-sizing: border-box;
+      border: 1px solid #888;
+      background: darkgray;
+      overflow: hidden;
+    }
+
+    #barre {
+      height: 40px;
+      padding: 10px;
+      box-sizing: border-box;
+      background: #ddd;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    #iframe {
+      display: block;
+      width: 100%;
+      height: calc(100% - 40px);
+      border: 0;
+    }
+
+    #poignee {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 22px;
+      height: 22px;
+      background: #555;
+      cursor: nwse-resize;
+      touch-action: none;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <section id="panneau">
+    <header id="barre">Faites glisser cette barre pour déplacer</header>
+    <iframe
+      id="iframe"
+      src="https://text-on-tap.live/captionex.html?e=testevent"
+      title="Contenu intégré">
+    </iframe>
+    <div id="poignee" aria-label="Redimensionner"></div>
+  </section>
+
+  <script>
+    const panneau = document.getElementById("panneau");
+    const barre = document.getElementById("barre");
+    const poignee = document.getElementById("poignee");
+
+    function limiterPosition() {
+      const maxX = Math.max(0, window.innerWidth - panneau.offsetWidth);
+      const maxY = Math.max(0, window.innerHeight - panneau.offsetHeight);
+
+      const gauche = Math.min(maxX, Math.max(0, panneau.offsetLeft));
+      const haut = Math.min(maxY, Math.max(0, panneau.offsetTop));
+
+      panneau.style.left = `${gauche}px`;
+      panneau.style.top = `${haut}px`;
+    }
+
+    barre.addEventListener("pointerdown", (event) => {
+      const rect = panneau.getBoundingClientRect();
+      const decalageX = event.clientX - rect.left;
+      const decalageY = event.clientY - rect.top;
+
+      barre.setPointerCapture(event.pointerId);
+
+      function deplacer(e) {
+        const maxX = Math.max(0, window.innerWidth - panneau.offsetWidth);
+        const maxY = Math.max(0, window.innerHeight - panneau.offsetHeight);
+
+        const gauche = Math.min(maxX, Math.max(0, e.clientX - decalageX));
+        const haut = Math.min(maxY, Math.max(0, e.clientY - decalageY));
+
+        panneau.style.left = `${gauche}px`;
+        panneau.style.top = `${haut}px`;
+      }
+
+      barre.addEventListener("pointermove", deplacer);
+      barre.addEventListener("pointerup", () => {
+        barre.removeEventListener("pointermove", deplacer);
+      }, { once: true });
+    });
+
+    poignee.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const debutX = event.clientX;
+      const debutY = event.clientY;
+      const largeurInitiale = panneau.offsetWidth;
+      const hauteurInitiale = panneau.offsetHeight;
+
+      poignee.setPointerCapture(event.pointerId);
+
+      function redimensionner(e) {
+        const largeurMax = window.innerWidth - panneau.offsetLeft;
+        const hauteurMax = window.innerHeight - panneau.offsetTop;
+
+        panneau.style.width = `${Math.max(
+          250,
+          Math.min(largeurMax, largeurInitiale + e.clientX - debutX)
+        )}px`;
+
+        panneau.style.height = `${Math.max(
+          180,
+          Math.min(hauteurMax, hauteurInitiale + e.clientY - debutY)
+        )}px`;
+      }
+
+      poignee.addEventListener("pointermove", redimensionner);
+      poignee.addEventListener("pointerup", () => {
+        poignee.removeEventListener("pointermove", redimensionner);
+      }, { once: true });
+    });
+
+    window.addEventListener("resize", limiterPosition);
+  </script>
+</body>
+</html>
