@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page déplaçable</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: black;
+      font-family: sans-serif;
+    }
+
+<style>
+  #panneau {
+    position: absolute;
+    left: 50px;
+    top: 50px;
+    width: 600px;
+    height: 200px;
+    min-width: 250px;
+    min-height: 100px;
+    border: 1px solid #aaa;
+    background: #f2f2f2;
+    box-sizing: border-box;
+    resize: both;
+    overflow: auto;
+  }
+
+  #barre {
+    height: 40px;
+    padding: 10px;
+    box-sizing: border-box;
+    background: #darkgray;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+  }
+
+  #iframe {
+    display: block;
+    width: 100%;
+    height: calc(100% - 40px);
+    border: 0;
+  }
+  </style>
+</head>
+<body>
+  <section id="panneau">
+    <header id="barre">Faites glisser ici pour déplacer</header>
+    <iframe
+      id="iframe"
+      src="https://text-on-tap.live/captionex.html?e=testevent"
+      title="Contenu intégré">
+    </iframe>
+  </section>
+
+  <script>
+    const panneau = document.getElementById("panneau");
+    const barre = document.getElementById("barre");
+    let decalageX, decalageY;
+
+    barre.addEventListener("pointerdown", (event) => {
+      const rect = panneau.getBoundingClientRect();
+      decalageX = event.clientX - rect.left;
+      decalageY = event.clientY - rect.top;
+      barre.setPointerCapture(event.pointerId);
+    });
+
+    barre.addEventListener("pointermove", (event) => {
+      if (!barre.hasPointerCapture(event.pointerId)) return;
+      panneau.style.left = `${event.clientX - decalageX}px`;
+      panneau.style.top = `${event.clientY - decalageY}px`;
+    });
+  </script>
+</body>
+</html>
