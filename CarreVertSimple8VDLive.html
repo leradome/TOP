@@ -1,0 +1,268 @@
+  <!DOCTYPE html>
+  <html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iframe déplaçable et redimensionnable</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: black;
+        font-family: sans-serif;
+      }
+
+      #panneau {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 80vw;
+        height: 80vh;
+        min-width: 10vw;
+        min-height: 10vh;
+        border: 1px solid #0B0B0B;
+        background: #0B0B0B;
+        overflow: hidden;
+      }
+
+      #barre {
+        height: 40px;
+        padding: 10px;
+        background: black;
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+      }
+
+      #iframe {
+        display: block;
+        width: 100%;
+        height: calc(100% - 40px);
+        border: 0;
+      }
+
+      #poignee {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+        width: 22px;
+        height: 22px;
+        background: orangered;
+        cursor: nwse-resize;
+        touch-action: none;
+      }
+      #boutonPleinEcran {
+        position: absolute;
+        right: 2px;
+        bottom: 26px;
+        z-index: 3;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border: 0;
+        background: black;
+        color: white;
+        font-size: 16px;
+        line-height: 22px;
+        cursor: pointer;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <section id="panneau">
+      <header id="barre">Faites glisser cette barre pour déplacer</header>
+//        src="https://text-on-tap.live/captionex.html?e=fUZnEydukr"
+
+      <iframe
+        id="iframe"
+        src="https://text-on-tap.live#e=fUZnEydukr"
+        title="Contenu intégré">
+      </iframe>
+
+  <button id="boutonPleinEcran" type="button" aria-label="Plein écran" title="Plein écran">
+    ⛶
+  </button>
+  <div id="poignee" aria-label="Redimensionner le panneau"></div>
+    </section>
+
+    <script>
+      const panneau = document.getElementById("panneau");
+      const barre = document.getElementById("barre");
+      const poignee = document.getElementById("poignee");
+
+function detecterSysteme() {
+  const ua = navigator.userAgent;
+
+  if (/Android/i.test(ua)) return "android";
+
+  // Inclut iPhone et iPad, y compris certains iPad récents
+  if (/iPhone|iPad|iPod/i.test(ua) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+    return "ios";
+  }
+
+  return "autre";
+}
+
+const systeme = detecterSysteme();
+console.log(systeme);
+if (systeme === "ios") {
+  // comportement pour iPhone/iPad
+  document.getElementById("boutonPleinEcran").style.display = "none";
+} else if (systeme === "android") {
+  // comportement pour Android
+    //document.getElementById("boutonPleinEcran").style.display = "⛶";
+}
+
+      function limiterPosition() {
+        const maxX = Math.max(0, window.innerWidth - panneau.offsetWidth);
+        const maxY = Math.max(0, window.innerHeight - panneau.offsetHeight);
+
+        panneau.style.left =
+          `${Math.min(maxX, Math.max(0, panneau.offsetLeft))}px`;
+        panneau.style.top =
+          `${Math.min(maxY, Math.max(0, panneau.offsetTop))}px`;
+      }
+
+      function ajusterEtCentrer() {
+        const largeur = Math.min(panneau.offsetWidth, window.innerWidth);
+        const hauteur = Math.min(panneau.offsetHeight, window.innerHeight);
+  
+        if (estEnPaysage()) {
+              panneau.style.width = `80vw`;
+              panneau.style.height = `80vh`;
+        } else {
+              panneau.style.width = `80vw`;
+              panneau.style.height = `30vh`;
+        }
+        panneau.style.left = `${(window.innerWidth - largeur) / 2}px`;
+        panneau.style.top = `${(window.innerHeight - hauteur) / 2}px`;
+      }
+
+      barre.addEventListener("pointerdown", (event) => {
+        const rect = panneau.getBoundingClientRect();
+        const decalageX = event.clientX - rect.left;
+        const decalageY = event.clientY - rect.top;
+
+        barre.setPointerCapture(event.pointerId);
+
+        function deplacer(e) {
+          const maxX = Math.max(0, window.innerWidth - panneau.offsetWidth);
+          const maxY = Math.max(0, window.innerHeight - panneau.offsetHeight);
+
+          panneau.style.left =
+            `${Math.min(maxX, Math.max(0, e.clientX - decalageX))}px`;
+          panneau.style.top =
+            `${Math.min(maxY, Math.max(0, e.clientY - decalageY))}px`;
+        }
+
+        function terminer() {
+          barre.removeEventListener("pointermove", deplacer);
+          barre.removeEventListener("pointerup", terminer);
+          barre.removeEventListener("pointercancel", terminer);
+        }
+
+        barre.addEventListener("pointermove", deplacer);
+        barre.addEventListener("pointerup", terminer);
+        barre.addEventListener("pointercancel", terminer);
+      });
+
+      poignee.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const debutX = event.clientX;
+        const debutY = event.clientY;
+        const largeurInitiale = panneau.offsetWidth;
+        const hauteurInitiale = panneau.offsetHeight;
+        const gauche = panneau.offsetLeft;
+        const haut = panneau.offsetTop;
+
+        poignee.setPointerCapture(event.pointerId);
+
+        function redimensionner(e) {
+          const largeurMax = Math.max(10, window.innerWidth - gauche);
+          const hauteurMax = Math.max(10, window.innerHeight - haut);
+
+          const largeurMin = Math.min(window.innerWidth * 0.1, largeurMax);
+          const hauteurMin = Math.min(window.innerHeight * 0.1, hauteurMax);
+
+          const nouvelleLargeur = Math.max(
+            largeurMin,
+            Math.min(largeurMax, largeurInitiale + e.clientX - debutX)
+          );
+
+          const nouvelleHauteur = Math.max(
+            hauteurMin,
+            Math.min(hauteurMax, hauteurInitiale + e.clientY - debutY)
+          );
+
+          panneau.style.width = `${nouvelleLargeur}px`;
+          panneau.style.height = `${nouvelleHauteur}px`;
+        }
+
+        function terminer() {
+          poignee.removeEventListener("pointermove", redimensionner);
+          poignee.removeEventListener("pointerup", terminer);
+          poignee.removeEventListener("pointercancel", terminer);
+        }
+
+        poignee.addEventListener("pointermove", redimensionner);
+        poignee.addEventListener("pointerup", terminer);
+        poignee.addEventListener("pointercancel", terminer);
+      });
+
+      window.addEventListener("load", ajusterEtCentrer);
+
+function estEnPaysage() {
+  return window.innerWidth > window.innerHeight;
+}
+function ajusterSiNecessaire() {
+  const largeurMax = window.innerWidth - panneau.offsetLeft;
+  const hauteurMax = window.innerHeight - panneau.offsetTop;
+
+  if (panneau.offsetWidth > largeurMax) {
+    panneau.style.width = `${Math.max(10, largeurMax)}px`;
+  }
+
+  if (panneau.offsetHeight > hauteurMax) {
+    panneau.style.height = `${Math.max(10, hauteurMax)}px`;
+  }
+
+  limiterPosition();
+}
+
+window.addEventListener("resize", ajusterSiNecessaire);
+
+document.getElementById("boutonPleinEcran").addEventListener("click", async () => {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+
+      if (screen.orientation?.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } else {
+      if (screen.orientation?.unlock) {
+        screen.orientation.unlock();
+      }
+      await document.exitFullscreen();
+    }
+  } catch (erreur) {
+    console.error("Plein écran ou orientation non disponible :", erreur);
+  }
+});
+screen.orientation?.addEventListener("change", ajusterEtCentrer);
+
+
+    </script>
+  </body>
+  </html>
